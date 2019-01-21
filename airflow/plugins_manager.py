@@ -30,7 +30,7 @@ import re
 import sys
 import pkg_resources
 
-from airflow import configuration
+from airflow import configuration, settings
 from airflow.utils.log.logging_mixin import LoggingMixin
 
 log = LoggingMixin().log
@@ -114,10 +114,11 @@ def is_valid_plugin(plugin_obj, existing_plugins):
     return False
 
 
-plugins_folder = configuration.conf.get('core', 'plugins_folder')
-if not plugins_folder:
-    plugins_folder = configuration.conf.get('core', 'airflow_home') + '/plugins'
-plugins_folder = os.path.expanduser(plugins_folder)
+plugins_folder = configuration.conf.get(
+    'core',
+    'plugins_folder',
+    fallback=os.path.join(settings.AIRFLOW_HOME, 'plugins')
+)
 
 if plugins_folder not in sys.path:
     sys.path.append(plugins_folder)

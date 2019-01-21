@@ -19,7 +19,7 @@
 import os
 import sys
 
-from airflow import configuration as conf
+from airflow import settings
 from importlib import import_module
 
 
@@ -27,8 +27,7 @@ def prepare_classpath():
     """
     Ensures that the Airflow home directory is on the classpath
     """
-    config_path = os.path.join(conf.get('core', 'airflow_home'), 'config')
-    config_path = os.path.expanduser(config_path)
+    config_path = os.path.join(settings.AIRFLOW_HOME, 'config')
 
     if config_path not in sys.path:
         sys.path.append(config_path)

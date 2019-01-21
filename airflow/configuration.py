@@ -529,6 +529,25 @@ conf = AirflowConfigParser(default_config=parameterized_config(DEFAULT_CONFIG))
 
 conf.read(AIRFLOW_CONFIG)
 
+if 'AIRFLOW_HOME' in os.environ:
+    if conf.has_option('core', 'AIRFLOW_HOME'):
+        warnings.warn(
+            'Specifying AIRFLOW_HOME environment variable and airflow_home in '
+            'the config file is deprecated. Please use the AIRFLOW_HOME '
+            'environment variable and remove the config file entry',
+            category=DeprecationWarning,
+        )
+else:
+    if conf.has_option('core', 'AIRFLOW_HOME'):
+        warnings.warn(
+            'Specifying airflow_home in the config file is deprecated. Please '
+            'use the AIRFLOW_HOME environment variable and remove the config '
+            'file entry',
+            category=DeprecationWarning,
+        )
+
+    AIRFLOW_HOME = conf.get('core', 'airflow_home', fallback=AIRFLOW_HOME)
+
 DEFAULT_WEBSERVER_CONFIG = _read_default_config_file('default_webserver_config.py')
 
 WEBSERVER_CONFIG = AIRFLOW_HOME + '/webserver_config.py'

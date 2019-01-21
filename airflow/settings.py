@@ -138,7 +138,7 @@ def configure_vars():
     global AIRFLOW_HOME
     global SQL_ALCHEMY_CONN
     global DAGS_FOLDER
-    AIRFLOW_HOME = os.path.expanduser(conf.get('core', 'AIRFLOW_HOME'))
+    AIRFLOW_HOME = conf.AIRFLOW_HOME
     SQL_ALCHEMY_CONN = conf.get('core', 'SQL_ALCHEMY_CONN')
     DAGS_FOLDER = os.path.expanduser(conf.get('core', 'DAGS_FOLDER'))
 
@@ -254,8 +254,8 @@ try:
 except Exception:
     pass
 
-logging_class_path = configure_logging()
 configure_vars()
+logging_class_path = configure_logging()
 configure_adapters()
 # The webservers import this file from models.py with the default settings.
 configure_orm()
