@@ -38,8 +38,9 @@ from airflow.utils.sqlalchemy import setup_event_handlers
 log = logging.getLogger(__name__)
 
 RBAC = conf.getboolean('webserver', 'rbac')
-
+YOUSE = conf.getboolean('webserver', 'youse')
 TIMEZONE = pendulum.timezone('UTC')
+
 try:
     tz = conf.get("core", "default_timezone")
     if tz == "system":

@@ -67,6 +67,8 @@ from airflow.www.app import (cached_app, create_app)
 from airflow.www_rbac.app import cached_app as cached_app_rbac
 from airflow.www_rbac.app import create_app as create_app_rbac
 from airflow.www_rbac.app import cached_appbuilder
+from airflow.www_youse.app import cached_app as cached_app_youse
+from airflow.www_youse.app import create_app as create_app_youse
 
 from sqlalchemy import func
 from sqlalchemy.orm import exc
@@ -845,6 +847,8 @@ def webserver(args):
                 args.port, args.hostname))
         if settings.RBAC:
             app, _ = create_app_rbac(conf, testing=conf.get('core', 'unit_test_mode'))
+        elif settings.YOUSE:
+            app, _ = create_app_youse(conf, testing=conf.get('core', 'unit_test_mode'))
         else:
             app = create_app(conf, testing=conf.get('core', 'unit_test_mode'))
         app.run(debug=True, use_reloader=False if app.config['TESTING'] else True,
@@ -852,7 +856,12 @@ def webserver(args):
                 ssl_context=(ssl_cert, ssl_key) if ssl_cert and ssl_key else None)
     else:
         os.environ['SKIP_DAGS_PARSING'] = 'True'
-        app = cached_app_rbac(conf) if settings.RBAC else cached_app(conf)
+        if settings.RBAC:
+            app = cached_app_rbac(conf)
+        elif settings.YOUSE:
+            app = cached_app_youse(conf)
+        else:
+            app = cached_app(conf)
         pid, stdout, stderr, log_file = setup_locations(
             "webserver", args.pid, args.stdout, args.stderr, args.log_file)
         os.environ.pop('SKIP_DAGS_PARSING')
@@ -894,7 +903,13 @@ def webserver(args):
         if ssl_cert:
             run_args += ['--certfile', ssl_cert, '--keyfile', ssl_key]
 
-        webserver_module = 'www_rbac' if settings.RBAC else 'www'
+        if settings.RBAC:
+            webserver_module = 'www_rbac'
+        elif settings.YOUSE:
+            webserver_module = 'www_youse'
+        else:
+            webserver_module = 'www'
+
         run_args += ["airflow." + webserver_module + ".app:cached_app()"]
 
         gunicorn_master_proc = None
@@ -1072,6 +1087,7 @@ def worker(args):
 def initdb(args):  # noqa
     print("DB: " + repr(settings.engine.url))
     db.initdb(settings.RBAC)
+    db.initdb(settings.YOUSE)
     print("Done.")
 
 
@@ -1081,6 +1097,7 @@ def resetdb(args):
                          "if they exist. Proceed? "
                          "(y/n)").upper() == "Y":
         db.resetdb(settings.RBAC)
+        db.resetdb(settings.YOUSE)
     else:
         print("Bail.")
 
