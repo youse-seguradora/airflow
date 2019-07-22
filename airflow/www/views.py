@@ -1128,7 +1128,10 @@ class Airflow(BaseView):
             flash("This run_id {} already exists".format(run_id))
             return redirect(origin)
 
-        run_conf = {}
+        if current_user is not None:
+            run_conf = {'current_user': current_user.__dict__}
+        else:
+            run_conf = {}
 
         dag.create_dagrun(
             run_id=run_id,
